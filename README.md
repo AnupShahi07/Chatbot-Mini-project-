@@ -7,3 +7,5 @@ Receive instant answers based on the dataset provided.
 Experience a lightweight and fast local chatbot solution.
 To check my basic mini chat-bot
 [click to visit](https://chatbot-mini-project.onrender.com)
+
+Thanks for visiting.
