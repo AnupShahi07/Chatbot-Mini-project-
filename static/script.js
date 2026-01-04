@@ -1,43 +1,39 @@
 const input = document.getElementById("message");
 const chatBox = document.getElementById("chat-box");
 
-function addMessage(msg, sender) {
-    const div = document.createElement("div");
-    div.className = "message " + sender;
-    div.textContent = msg;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
+function addMessage(text, sender) {
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `message ${sender}`;
+  messageDiv.textContent = text;
+
+  chatBox.appendChild(messageDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function sendMessage() {
-    const msg = input.value.trim();
-    if (!msg) return;
+  const userMessage = input.value.trim();
+  if (userMessage === "") return;
 
-    addMessage("You: " + msg, "user");
-    input.value = "";
+  addMessage(userMessage, "user");
+  input.value = "";
 
-    try {
-        const res = await fetch("/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: msg })
-        });
+  try {
+    const response = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userMessage })
+    });
 
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
+    const data = await response.json();
+    addMessage(data.response, "bot");
 
-        const data = await res.json();
-        addMessage("StudyBot: " + data.response, "bot");
-    } catch (error) {
-        addMessage("StudyBot: Sorry, I couldn't process your request.", "bot");
-        console.error("Fetch error:", error);
-    }
+  } catch (error) {
+    addMessage("Sorry, something went wrong.", "bot");
+    console.error(error);
+  }
 }
 
-// Press Enter to send
-input.addEventListener("keypress", function (e) {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
+// Send message on Enter key
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
 });

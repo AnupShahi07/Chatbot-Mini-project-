@@ -4,7 +4,32 @@ body {
     background-size: cover;
     padding: 20px;
 }
+#container {
+    position: relative;
+    min-height: 100vh;
+}
 
+#right-container {
+    position: absolute;
+    right: 20px;       /* Keeps it 20px from the right edge */
+    top: 100px;        /* Adjust this to move it up or down */
+    width: 250px;      /* Fixed width so it doesn't overlap the center */
+    background: #acbcd5e4; /* Semi-transparent white */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    color: #333;       /* Dark text for visibility */
+}
+
+#right-container h3 {
+    font-size: 16px;
+    margin-top: 0;
+}
+
+#list {
+    padding-left: 20px;
+    font-size: 14px;
+}
 h1{
     display: block;
     margin: 0 auto;
@@ -120,5 +145,10 @@ button:hover {
     img {
         height: 40px; 
         border-radius: 50%; 
+    }
+    #right-container {
+        position: static; /* Moves it back to the normal flow */
+        width: 90%;
+        margin-top: 20px;
     }
 }

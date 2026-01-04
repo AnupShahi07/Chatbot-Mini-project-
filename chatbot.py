@@ -1,104 +1,57 @@
 from flask import Flask, request, jsonify, render_template
-import pandas as pd
-import os
 import string
+import os
 
 app = Flask(__name__)
 
-data = {
-    "question": [
-        # Greetings
-        "hi", "hello", "hey", "how are you", "good morning", "good evening","good night","what","thanks",
+# Knowledge base (simple dictionary)
+knowledge_base = {
+    "hi": "Hello! How can I help you today?",
+    "hello": "Hi there! Ask me anything.",
+    "hey": "Hey! What would you like to know?",
+    "how are you": "I'm doing great! How can I assist you?",
+    "good morning": "Good morning! What can I do for you?",
+    "good evening": "Good evening! Feel free to ask me something.",
+    "good night": "Good night! Take some rest.",
+    "thanks": "You're welcome!",
 
-        # Informational
-        "who build you?",
-        "how to prepare for exams",
-        "best programming language to learn",
-        "how to improve english",
-        "what is python",
-        "how to build a website",
-        "tips for time management",
-        "how to improve programming logic",
-        "how to create a chatbot",
-        "what is machine learning",
-        "how to learn data analysis"
-    ],
-    "answer": [
-        # Greeting responses
-        "Hello! How can I help you today?",
-        "Hi there! Ask me anything.",
-        "Hey! What would you like to know?",
-        "I'm just a bot, but I'm doing great! How can I assist you?",
-        "Good morning! What can I do for you?",
-        "Good evening! Feel free to ask me something.",
-        "Good night! take some rest.",
-        "Sorry, I didn't understand that. Can you rephrase it?",
-        "your welcome.",
-
-        # Informational responses
-        "Anup shahi Build me to assist you.",
-        "Make a timetable and revise regularly.",
-        "Start with Python. Then JavaScript or C++.",
-        "Read books, speak often, and use apps like Duolingo.",
-        "Python is a programming language used in backd-end ",
-        "Learn HTML, CSS, JavaScript, and use Flask or Django for backend.",
-        "Use calendars, set deadlines, and avoid multitasking.",
-        "Practice solving problems and learn algorithms step by step.",
-        "Use Python + Flask for a simple chatbot. Integrate logic and UI.",
-        "Machine learning enables computers to learn from data.",
-        "Start with Excel, then learn Python, Pandas, and visualization tools."
-    ]
+    "who build you": "Anup Shahi built me to assist you.",
+    "how to prepare for exams": "Make a timetable and revise regularly.",
+    "best programming language to learn": "Start with Python, then JavaScript.",
+    "how to improve english": "Read, speak daily, and practice consistently.",
+    "what is python": "Python is a backend programming language.",
+    "how to build a website": "Learn HTML, CSS, JavaScript, and Flask.",
+    "how to create a chatbot": "Use Python with Flask and simple logic."
 }
-kb = pd.DataFrame(data)
 
-# Basic preprocessing (lowercase + remove punctuation)
 def clean_text(text):
     text = text.lower()
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    return text.strip()
+    return text.translate(str.maketrans("", "", string.punctuation)).strip()
 
-# Clean all questions in the knowledge base
-kb['clean_question'] = kb['question'].apply(clean_text)
-
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/about us')
-def aboutus():
-    return render_template('about us.html')
+@app.route('/about-us')
+def aboutus(): 
+    return render_template('about-us.html')
 
-@app.route('/chat', methods=['POST'])
+@app.route("/chat", methods=["POST"])
 def chat():
-    user_msg = request.json.get("message", "")
-    cleaned_input = clean_text(user_msg)
+    user_message = request.json.get("message", "")
+    cleaned_message = clean_text(user_message)
 
-    # Try exact match first
-    for i, q in enumerate(kb['clean_question']):
-        if cleaned_input == q:
-            return jsonify({"response": kb.iloc[i]['answer']})
+    # Exact match
+    if cleaned_message in knowledge_base:
+        return jsonify({"response": knowledge_base[cleaned_message]})
 
-    # Try partial/keyword match
-    user_words = set(cleaned_input.split())
-    max_overlap = 0
-    best_index = -1
+    # Partial match
+    for question, answer in knowledge_base.items():
+        if question in cleaned_message:
+            return jsonify({"response": answer})
 
-    for i, q in enumerate(kb['clean_question']):
-        question_words = set(q.split())
-        overlap = len(user_words & question_words)
-        if overlap > max_overlap:
-            max_overlap = overlap
-            best_index = i
+    return jsonify({"response": "Sorry, I didn't understand that. Can you rephrase?"})
 
-    if max_overlap > 0:
-        return jsonify({"response": kb.iloc[best_index]['answer']})
-    else:
-        return jsonify({"response": "Sorry, I didn't understand that. Can you rephrase it?"})
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    is_local = os.environ.get("RAILWAY_STATIC_URL") is None  # Railway sets this but i am using render 
-    if is_local:
-        app.run(debug=True, port=5000)                     # using in local computer
-    else:
-        app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
